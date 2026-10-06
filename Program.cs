@@ -1,4 +1,6 @@
 using Aplicada1P1.Components;
+using Aplicada1P1.Context;
+using Aplicada1P1.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -6,9 +8,9 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 var app = builder.Build();
-/*builder.Services.AddDbContext<Contexto>(opciones =>
+builder.Services.AddDbContext<Contexto>(opciones =>
     opciones.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
-builder.Services.AddScoped<Service>();*/
+builder.Services.AddScoped<AutoresServices>();
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())

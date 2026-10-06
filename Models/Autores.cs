@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace Services.Models;
+namespace Aplicada1P1.Models;
 
 public class Autores
 {
