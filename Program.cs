@@ -1,16 +1,23 @@
 using Aplicada1P1.Components;
 using Aplicada1P1.Context;
 using Aplicada1P1.Models;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
+
+var ConStr = builder.Configuration.GetConnectionString("ConStr");
+
+builder.Services.AddDbContextFactory<Contexto>(opciones =>
+   opciones.UseSqlServer(ConStr));
+builder.Services.AddScoped<AutoresServices>();
+
 
 // Add services to the container.
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 var app = builder.Build();
-builder.Services.AddDbContext<Contexto>(opciones =>
-    opciones.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
-builder.Services.AddScoped<AutoresServices>();
+
+
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())

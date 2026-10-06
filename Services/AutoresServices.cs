@@ -1,18 +1,15 @@
-using Microsoft.EntityFrameworkCore.Internal;
+
 using Aplicada1P1.Context;
 using System.Linq.Expressions;
 using Microsoft.EntityFrameworkCore;
 using Aplicada1.Core;
+
 namespace Aplicada1P1.Models;
 
 
 
-public class AutoresServices()
+public class AutoresServices(IDbContextFactory<Contexto> contextFactory) : Aplicada1.Core.IService<Autores, int>
 {
-    public class AutoresService(
-    IDbContextFactory<Contexto> contextFactory
-    ) : Aplicada1.Core.IService<Autores, int>
-    {
         public async Task<bool> Existe(int autorId)
         {
             await using var contexto = await contextFactory.CreateDbContextAsync();
@@ -55,20 +52,14 @@ public class AutoresServices()
         public async Task<Autores?> Buscar(int autorId)
         {
             await using var contexto = await contextFactory.CreateDbContextAsync();
-            return await contexto.Autores.Include(d => d.IdAutor)
-                .FirstOrDefaultAsync(a => a.IdAutor == autorId);
+            return await contexto.Autores.FirstOrDefaultAsync(a => a.IdAutor == autorId);
         }
 
         public async Task<List<Autores>> GetList(Expression<Func<Autores, bool>> criterio)
         {
             await using var contexto = await contextFactory.CreateDbContextAsync();
-            return await contexto.Autores
-                .Include(d => d.IdAutor)
-                .Where(criterio)
-                .AsNoTracking()
-                .ToListAsync();
+            return await contexto.Autores.Where(criterio).AsNoTracking().ToListAsync();
         }
 
 
-    }
 }

@@ -1,0 +1,114 @@
+﻿@page "/Autores/Create"
+@page "/Autores/Edit/{AutorId:int}"
+
+@using Aplicada1P1.Models
+
+@inject AutoresServices autoresServices
+@inject NavigationManager navigationManager
+
+
+<PageTitle>@(autor.IdAutor == 0 ? "Registro de Autor" : "Editar Autor")</PageTitle>
+
+<EditForm Model="autor" OnValidSubmit="Guardar" FormName="AutoresForm">
+    <DataAnnotationsValidator />
+
+    <div class="container">
+        <div class="card shadow-lg">
+            <div class="card-header">
+                <h3 class="card-title mb-0">@(autor.IdAutor == 0 ? "Registro de Autor" : "Editar Autor")</h3>
+            </div>
+
+            <div class="card-body">
+                @if(!string.IsNullOrEmpty(MensajeError))
+                {
+                    <div class="alert alert-danger" role="alert">
+                        @MensajeError
+                    </div>
+                }
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Nombres:</label>
+                        <InputText class="form-control" @bind-Value="autor.Nombres"/>
+                        <ValidationMessage For="@(() => autor.Nombres)"/>
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Nacionalidad:</label>
+                        <InputText class="form-control" @bind-Value="autor.Nacionalidad"/>
+                        <ValidationMessage For="@(() => autor.Nacionalidad)"/>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Fecha de nacimiento:</label>
+                        <InputDate class="form-control" @bind-Value="autor.FechaNacimiento"/>
+                        <ValidationMessage For="@(() => autor.FechaNacimiento)"/>
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Sueldo:</label>
+                        <InputNumber class="form-control" @bind-Value="autor.Sueldo"/>
+                        <ValidationMessage For="@(() => autor.Sueldo)"/>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card-footer text-center">
+                <a href="/Autores/Index" class="btn btn-secondary">
+                    <span class="bi bi-arrow-left"></span> Volver
+                </a>
+                <button type="submit" class="btn btn-primary">
+                    <span class="bi bi-floppy"></span> Guardar
+                </button>
+            </div>
+        </div>
+    </div>
+</EditForm>
+
+@code {
+    [Parameter]
+    public int AutorId { get; set; }
+
+    public Autores autor { get; set; } = new Autores();
+    public string MensajeError { get; set; } = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Si el AutorId es mayor a 0, significa que estamos editando
+        if (AutorId > 0)
+        {
+            var autorEncontrado = await autoresServices.Buscar(AutorId);
+            
+            if (autorEncontrado != null)
+            {
+                autor = autorEncontrado;
+            }
+            else
+            {
+                MensajeError = "No se encontró el autor solicitado.";
+            }
+        }
+        else
+        {
+            // Inicializar fecha de nacimiento por defecto si es un nuevo registro
+            autor.FechaNacimiento = DateTime.Today;
+        }
+    }
+
+    public async Task Guardar()
+    {
+        MensajeError = string.Empty;
+        var guardado = await autoresServices.Guardar(autor);
+        
+        if (guardado)
+        {
+            navigationManager.NavigateTo("/Autores/Index");
+        }
+        else
+        {
+            MensajeError = "Ocurrió un error al intentar guardar el autor.";
+        }
+    }
+}

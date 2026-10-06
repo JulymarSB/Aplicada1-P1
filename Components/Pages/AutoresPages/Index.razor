@@ -1,0 +1,141 @@
+﻿@page "/Autores/Index"
+
+@using Aplicada1P1.Models;
+
+@inject AutoresServices autoresServices
+@inject NavigationManager navigation
+
+<PageTitle>Consulta de Autores</PageTitle>
+
+<div class="container">
+    <div class="card shadow-lg">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="card-title mb-0">Registro de Autores</h5>
+            <a href="/Autores/Create" class="btn btn-primary">
+                <span class="bi bi-plus-square"></span> Crear
+            </a>
+        </div>
+
+        <div class="card-body">
+            @* Fila de Filtros *@
+            <div class="row align-items-end mb-4">
+                <div class="col-md-3">
+                    <label class="form-label"><strong>Filtrar por</strong></label>
+                    <select class="form-select" @bind="Filtro">
+                        <option value="" selected disabled>Elija una opci&oacute;n</option>
+                        <option value="Id">ID</option>
+                        <option value="Nombres">Nombres</option>
+                        <option value="Nacionalidad">Nacionalidad</option>
+                    </select>
+                </div>
+
+                <div class="col-md-4">
+                    <label class="form-label"><strong>B&uacute;squeda</strong></label>
+                    <div class="input-group">
+                        <input class="form-control" @bind="ValorFiltro" placeholder="Buscar..." />
+                        <button type="button" class="btn btn-outline-primary" @onclick="Buscar">
+                            <span class="bi bi-search"></span> Buscar
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="col-md-3">
+                    <button type="button" class="btn btn-outline-secondary" @onclick="Restablecer">
+                        <span class="bi bi-arrow-clockwise"></span> Restablecer
+                    </button>
+                </div>
+            </div>
+
+            @* Tabla de Resultados *@
+            <table class="table table-hover table-bordered">
+                <thead class="table-light">
+                    <tr>
+                        <th>ID</th>
+                        <th>Nombres</th>
+                        <th>Nacionalidad</th>
+                        <th>Fecha Nacimiento</th>
+                        <th>Sueldo</th>
+                        <th class="text-center">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (ListaAutores.Any())
+                    {
+                        @foreach (var autor in ListaAutores)
+                        {
+                            <tr>
+                                <td>@autor.IdAutor</td>
+                                <td>@autor.Nombres</td>
+                                <td>@autor.Nacionalidad</td>
+                                <td>@autor.FechaNacimiento.ToString("dd/MM/yyyy")</td>
+                                <td>@autor.Sueldo.ToString("N2")</td>
+                                <td class="text-center">
+                                    <a href="/Autores/Edit/@autor.IdAutor" class="btn btn-sm btn-outline-warning">
+                                        <span class="bi bi-pencil"></span>
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="6" class="text-center">No se encontraron registros.</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        @* Totales (Requerimiento obligatorio) *@
+        <div class="card-footer bg-light d-flex justify-content-between">
+            <strong>Total de Autores mostrados: @ListaAutores.Count</strong>
+            <strong>Suma total de Sueldos: $@ListaAutores.Sum(a => a.Sueldo).ToString("N2")</strong>
+        </div>
+    </div>
+</div>
+
+@code {
+    public List<Autores> ListaAutores { get; set; } = new List<Autores>();
+    public string Filtro { get; set; } = string.Empty;
+    public string ValorFiltro { get; set; } = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await CargarTodos();
+    }
+
+    private async Task Buscar()
+    {
+        if (string.IsNullOrWhiteSpace(ValorFiltro) || string.IsNullOrWhiteSpace(Filtro))
+        {
+            await CargarTodos();
+            return;
+        }
+
+        if (Filtro == "Id" && int.TryParse(ValorFiltro, out int id))
+        {
+            ListaAutores = await autoresServices.GetList(a => a.IdAutor == id);
+        }
+        else if (Filtro == "Nombres")
+        {
+            ListaAutores = await autoresServices.GetList(a => a.Nombres.ToLower().Contains(ValorFiltro.ToLower()));
+        }
+        else if (Filtro == "Nacionalidad")
+        {
+            ListaAutores = await autoresServices.GetList(a => a.Nacionalidad.ToLower().Contains(ValorFiltro.ToLower()));
+        }
+    }
+
+    private async Task Restablecer()
+    {
+        Filtro = string.Empty;
+        ValorFiltro = string.Empty;
+        await CargarTodos();
+    }
+
+    private async Task CargarTodos()
+    {
+        ListaAutores = await autoresServices.GetList(a => a.IdAutor > 0);
+    }
+}
