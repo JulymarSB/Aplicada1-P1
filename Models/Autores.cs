@@ -14,7 +14,7 @@ public class Autores
     public string Nacionalidad { get; set; } = string.Empty;
 
     
-    public DateTime FechaNacimiento { get; set; } = DateTime.MinValue;
+    public DateTime FechaNacimiento { get; set; } = DateTime.Today;
 
     [Range(1, int.MaxValue, ErrorMessage="El sueldo debe ser mayor a cero")]
     public decimal Sueldo { get; set; }

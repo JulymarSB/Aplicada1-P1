@@ -70,13 +70,12 @@
 @code {
     [Parameter]
     public int AutorId { get; set; }
-
-    public Autores autor { get; set; } = new Autores();
+    [SupplyParameterFromForm]
+    public Autores autor { get; set; } = new ();
     public string MensajeError { get; set; } = string.Empty;
 
     protected override async Task OnInitializedAsync()
     {
-        // Si el AutorId es mayor a 0, significa que estamos editando
         if (AutorId > 0)
         {
             var autorEncontrado = await autoresServices.Buscar(AutorId);
@@ -108,7 +107,7 @@
         }
         else
         {
-            MensajeError = "Ocurrió un error al intentar guardar el autor.";
+            MensajeError = "Ya existe un autor registrado con ese nombre.";
         }
     }
 }

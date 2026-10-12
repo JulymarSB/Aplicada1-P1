@@ -16,6 +16,12 @@ public class AutoresServices(IDbContextFactory<Contexto> contextFactory) : Aplic
             return await contexto.Autores.AnyAsync(a => a.IdAutor == autorId);
         }
 
+        public async Task<bool> ExisteNombre(string nombre, int IdAutor)
+    {
+        await using var contexto = await contextFactory.CreateDbContextAsync();
+        return await contexto.Autores.AnyAsync(a => a.Nombres.ToLower() == nombre.ToLower() && a.IdAutor != IdAutor);
+    }
+
         private async Task<bool> Insertar(Autores autor)
         {
             await using var contexto = await contextFactory.CreateDbContextAsync();
@@ -31,7 +37,11 @@ public class AutoresServices(IDbContextFactory<Contexto> contextFactory) : Aplic
 
         public async Task<bool> Guardar(Autores autor)
         {
-            autor.IdAutor = autor.IdAutor;
+           /* if (await ExisteNombre(autor.Nombres, autor.IdAutor))
+            {
+                return false;
+            }
+            */
             if (!await Existe(autor.IdAutor))
             {
                 return await Insertar(autor);
@@ -40,6 +50,7 @@ public class AutoresServices(IDbContextFactory<Contexto> contextFactory) : Aplic
             {
                 return await Modificar(autor);
             }
+        
         }
         public async Task<bool> Eliminar(int autorId)
         {
